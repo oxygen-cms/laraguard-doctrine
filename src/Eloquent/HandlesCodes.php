@@ -141,7 +141,7 @@ trait HandlesCodes
      */
     protected function getBinarySecret()
     {
-        return $this->attributes['shared_secret'];
+        return $this->shared_secret;
     }
 
     /**

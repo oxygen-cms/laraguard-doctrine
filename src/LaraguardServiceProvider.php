@@ -10,7 +10,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Validation\Factory;
 
-class LaraguardServiceProvider extends ServiceProvider
+class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
 {
     /**
      * Register the application services.
@@ -19,6 +19,7 @@ class LaraguardServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->loadEntitiesFrom(__DIR__ . '/Doctrine');
         $this->mergeConfigFrom(__DIR__ . '/../config/laraguard.php', 'laraguard');
     }
 
@@ -34,9 +35,9 @@ class LaraguardServiceProvider extends ServiceProvider
     public function boot(Repository $config, Router $router, Dispatcher $dispatcher, Factory $validator)
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'laraguard');
-        $this->loadFactoriesFrom(__DIR__ . '/../database/factories');
+        // $this->loadFactoriesFrom(__DIR__ . '/../database/factories');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'laraguard');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->registerListener($config, $dispatcher);
         $this->registerMiddleware($router);

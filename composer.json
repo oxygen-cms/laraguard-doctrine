@@ -25,6 +25,8 @@
         "ext-json": "*",
         "bacon/bacon-qr-code": "^2.0",
         "paragonie/constant_time_encoding": "^2.0",
+        "oxygen/data": "~0.9.1",
+        "doctrine/orm": "~2.7",
         "illuminate/support": "^6.15||^7.0",
         "illuminate/auth": "^6.15||^7.0"
     },
