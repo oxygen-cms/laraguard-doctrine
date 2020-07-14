@@ -40,7 +40,6 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
         // $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->registerListener($config, $dispatcher);
-        $this->registerMiddleware($router);
         $this->registerRules($validator);
         $this->registerRoutes($config, $router);
 
@@ -68,18 +67,6 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
 
         $dispatcher->listen(Attempting::class, Contracts\TwoFactorListener::class . '@saveCredentials');
         $dispatcher->listen(Validated::class, Contracts\TwoFactorListener::class . '@checkTwoFactor');
-    }
-
-    /**
-     * Register the middleware.
-     *
-     * @param  \Illuminate\Routing\Router  $router
-     * @return void
-     */
-    protected function registerMiddleware(Router $router)
-    {
-        $router->aliasMiddleware('2fa.require', Http\Middleware\RequireTwoFactorEnabled::class);
-        $router->aliasMiddleware('2fa.confirm', Http\Middleware\ConfirmTwoFactorCode::class);
     }
 
     /**

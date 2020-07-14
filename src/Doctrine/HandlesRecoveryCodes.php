@@ -1,6 +1,6 @@
 <?php
 
-namespace DarkGhostHunter\Laraguard\Eloquent;
+namespace DarkGhostHunter\Laraguard\Doctrine;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;

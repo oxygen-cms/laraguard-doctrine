@@ -1,40 +1,18 @@
 <?php
 
-namespace DarkGhostHunter\Laraguard\Eloquent;
+namespace DarkGhostHunter\Laraguard\Doctrine;
 
+use Doctrine\ORM\Mapping AS ORM;
+use Illuminate\Support\Collection;
 use Oxygen\Data\Behaviour\PrimaryKey;
 use Oxygen\Data\Behaviour\Timestamps;
 use ParagonIE\ConstantTime\Base32;
-use Illuminate\Database\Eloquent\Model;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorTotp;
-
-///**
-// * @mixin \Illuminate\Database\Eloquent\Builder
-// *
-// * @property-read int $id
-// *
-// * @property-read null|\DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable $authenticatable
-// *
-// * @property string $shared_secret
-// *
-// * @property string $label
-// * @property int $digits
-// * @property int $seconds
-// * @property int $window
-// * @property string $algorithm
-// * @property array $totp_config
-// * @property null|\Illuminate\Support\Collection $recovery_codes
-// * @property null|\Illuminate\Support\Collection $safe_devices
-// * @property null|\Illuminate\Support\Carbon|\DateTime $enabled_at
-// * @property null|\Illuminate\Support\Carbon|\DateTime $recovery_codes_generated_at
-// *
-// * @property null|\Illuminate\Support\Carbon|\DateTime $updated_at
-// * @property null|\Illuminate\Support\Carbon|\DateTime $created_at
-// */
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="`two_factor_auth`")
+ * @ORM\HasLifecycleCallbacks
  */
 class TwoFactorAuthentication implements TwoFactorTotp {
     use HandlesCodes;
@@ -44,32 +22,8 @@ class TwoFactorAuthentication implements TwoFactorTotp {
 
     use PrimaryKey, Timestamps;
 
-//    /**
-//     * The attributes that should be cast to native types.
-//     *
-//     * @var array
-//     */
-//    protected $casts = [
-//        'authenticatable_id' => 'int',
-//        'digits'             => 'int',
-//        'seconds'            => 'int',
-//        'window'             => 'int',
-//        'recovery_codes'     => 'collection',
-//        'safe_devices'       => 'collection',
-//    ];
-
-//    /**
-//     * The attributes that should be mutated to dates.
-//     *
-//     * @var array
-//     */
-//    protected $dates = [
-//        'enabled_at',
-//        'recovery_codes_generated_at',
-//    ];
-
     /**
-     * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\User", fetch="EAGER", cascade="persist")
+     * @ORM\OneToOne(targetEntity="\Oxygen\Auth\Entity\User", inversedBy="twoFactorAuth")
      */
     protected $authenticatable;
 
@@ -79,7 +33,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     protected $shared_secret;
 
     /**
-     * @ORM\Column(name="enabled_at", type="datetime")
+     * @ORM\Column(name="enabled_at", type="datetime", nullable=true)
      * @var \DateTime
      */
     private $enabled_at;
@@ -99,35 +53,36 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      */
     private $seconds;
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="smallint", name="`window`")
      */
     private $window;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", name="`algorithm`")
      */
     private $algorithm;
 
     /**
-     * @ORM\Column(type="json_array")
+     * @ORM\Column(type="json_array", nullable=true)
      */
     protected $recovery_codes;
 
     /**
-     * @ORM\Column(name="recovery_codes_generated_at", type="datetime")
+     * @ORM\Column(name="recovery_codes_generated_at", type="datetime", nullable=true)
      * @var \DateTime
      */
     private $recovery_codes_generated_at;
 
     /**
-     * @ORM\Column(type="json_array")
+     * @ORM\Column(type="json_array", nullable=true)
      */
     private $safe_devices;
 
     /**
      * TwoFactorAuthentication constructor.
      */
-    public function __construct() {
+    public function __construct($authenticatable) {
+        $this->authenticatable = $authenticatable;
         $this->digits = 6;
         $this->seconds = 30;
         $this->window = 0;
@@ -142,25 +97,52 @@ class TwoFactorAuthentication implements TwoFactorTotp {
         return $this->authenticatable();
     }
 
-//    /**
-//     * The model that uses Two Factor Authentication.
-//     *
-//     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-//     */
-//    public function authenticatable()
-//    {
-//        return $this->morphTo('authenticatable');
-//    }
+    public function setLabel(string $string) {
+        $this->label = $string;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getRecoveryCodes() {
+        return collect($this->recovery_codes);
+    }
+
+    /**
+     * @param Collection $codes
+     * @return void
+     */
+    public function setRecoveryCodes(Collection $codes) {
+        $this->recovery_codes = $codes->toArray();
+    }
+
+    public function setRecoveryCodesGeneratedAt(\Illuminate\Support\Carbon $now)
+    {
+        $this->recovery_codes_generated_at = $now->toDateTime();
+    }
+
+    public function getSafeDevices()
+    {
+        return collect($this->safe_devices);
+    }
+
+    public function setSafeDevices(Collection $devices)
+    {
+        $this->safe_devices = $devices->toArray();
+    }
+
+    public function setEnabledAt(\Illuminate\Support\Carbon $now)
+    {
+        $this->enabled_at = $now->toDateTime();
+    }
 
     /**
      * Gets the Shared Secret attribute from its binary form.
-     *
-     * @param $value
      * @return null|string
      */
-    protected function getSharedSecretAttribute($value)
+    protected function getSharedSecret()
     {
-        return $value === null ? $value : Base32::encodeUpper($value);
+        return $this->shared_secret;
     }
 
     /**
@@ -168,9 +150,9 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @param $value
      */
-    protected function setSharedSecretAttribute($value)
+    protected function setSharedSecret($value)
     {
-        $this->shared_secret = Base32::decodeUpper($value);
+        $this->shared_secret = $value;
     }
 
     /**
@@ -208,8 +190,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @return $this
      */
-    public function flushAuth()
-    {
+    public function flushAuth() {
         $this->recovery_codes = null;
         $this->recovery_codes_generated_at = null;
         $this->safe_devices = null;
@@ -222,7 +203,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
         $this->window = $defaults['window'];
         $this->algorithm = $defaults['algorithm'];
 
-        $this->setSharedSecretAttribute(static::generateRandomSecret());
+        $this->shared_secret = static::generateRandomSecret();
 
         return $this;
     }
@@ -232,10 +213,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @return string
      */
-    public static function generateRandomSecret()
-    {
-        return Base32::encodeUpper(
-            random_bytes(config('laraguard.secret_length'))
-        );
+    public static function generateRandomSecret() {
+        return trim(Base32::encodeUpper(random_bytes(config('laraguard.secret_length')), '='));
     }
 }

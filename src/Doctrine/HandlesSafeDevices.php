@@ -1,20 +1,18 @@
 <?php
 
-namespace DarkGhostHunter\Laraguard\Eloquent;
+namespace DarkGhostHunter\Laraguard\Doctrine;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 
-trait HandlesSafeDevices
-{
+trait HandlesSafeDevices {
     /**
      * Returns the timestamp of the Safe Device.
      *
      * @param  null|string  $token
      * @return null|\Illuminate\Support\Carbon
      */
-    public function getSafeDeviceTimestamp(string $token = null)
-    {
+    public function getSafeDeviceTimestamp(string $token = null) {
         if ($token && $device = collect($this->safe_devices)->firstWhere('2fa_remember', $token)) {
             return Carbon::createFromTimestamp($device['added_at']);
         }
@@ -27,8 +25,7 @@ trait HandlesSafeDevices
      *
      * @return string
      */
-    public static function generateDefaultTwoFactorRemember()
-    {
+    public static function generateDefaultTwoFactorRemember() {
         return Str::random(100);
     }
 }

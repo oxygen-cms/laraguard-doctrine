@@ -2,35 +2,41 @@
 
 namespace DarkGhostHunter\Laraguard;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping AS ORM;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
-/**
- * @property-read \DarkGhostHunter\Laraguard\Eloquent\TwoFactorAuthentication $twoFactorAuth
- */
-trait TwoFactorAuthentication
+trait DoctrineTwoFactorAuthentication
 {
-    /**
-     * Initialize the current Trait.
-     *
-     * @return void
-     */
-    public function initializeTwoFactorAuthentication()
-    {
-        // For security, we will hide the Two Factor Authentication data from the parent model.
-        $this->makeHidden('twoFactorAuth');
-    }
+//    /**
+//     * Initialize the current Trait.
+//     *
+//     * @return void
+//     */
+//    public function initializeTwoFactorAuthentication()
+//    {
+//        // For security, we will hide the Two Factor Authentication data from the parent model.
+//        $this->makeHidden('twoFactorAuth');
+//    }
+//
+//    /**
+//     * This connects the current Model to the Two Factor Authentication model.
+//     *
+//     * @return \Illuminate\Database\Eloquent\Relations\MorphOne|\DarkGhostHunter\Laraguard\Eloquent\TwoFactorAuthentication
+//     */
+//    public function twoFactorAuth()
+//    {
+//        return $this->morphOne(config('laraguard.model'), 'authenticatable')
+//            ->withDefault(config('laraguard.totp'));
+//    }
 
     /**
-     * This connects the current Model to the Two Factor Authentication model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne|\DarkGhostHunter\Laraguard\Eloquent\TwoFactorAuthentication
+     * @ORM\OneToOne(targetEntity="DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication", mappedBy="authenticatable")
+     * @var \DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication
      */
-    public function twoFactorAuth()
-    {
-        return $this->morphOne(config('laraguard.model'), 'authenticatable')
-            ->withDefault(config('laraguard.totp'));
-    }
+    protected $twoFactorAuth;
 
     /**
      * Determines if the User has Two Factor Authentication enabled.
@@ -39,7 +45,7 @@ trait TwoFactorAuthentication
      */
     public function hasTwoFactorEnabled() : bool
     {
-        return $this->twoFactorAuth->isEnabled();
+        return $this->twoFactorAuth != null && $this->twoFactorAuth->isEnabled();
     }
 
     /**
@@ -47,15 +53,15 @@ trait TwoFactorAuthentication
      *
      * @return void
      */
-    public function enableTwoFactorAuth() : void
-    {
-        $this->twoFactorAuth->enabled_at = now();
+    public function enableTwoFactorAuth() : void {
+        $this->twoFactorAuth->setEnabledAt(now());
 
         if (config('laraguard.recovery.enabled')) {
             $this->generateRecoveryCodes();
         }
 
-        $this->twoFactorAuth->save();
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         event(new Events\TwoFactorEnabled($this));
     }
@@ -67,7 +73,10 @@ trait TwoFactorAuthentication
      */
     public function disableTwoFactorAuth() : void
     {
-        $this->twoFactorAuth->flushAuth()->save();
+
+        $this->twoFactorAuth->flushAuth();
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         event(new Events\TwoFactorDisabled($this));
     }
@@ -77,12 +86,16 @@ trait TwoFactorAuthentication
      *
      * @return \DarkGhostHunter\Laraguard\Contracts\TwoFactorTotp
      */
-    public function createTwoFactorAuth() : Contracts\TwoFactorTotp
-    {
+    public function createTwoFactorAuth() : Contracts\TwoFactorTotp {
+        if($this->twoFactorAuth == null) {
+            $this->twoFactorAuth = new \DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication($this);
+        }
         $this->twoFactorAuth
             ->flushAuth()
-            ->setAttribute('label', $this->twoFactorLabel())
-            ->save();
+            ->setLabel($this->twoFactorLabel());
+
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         return $this->twoFactorAuth;
     }
@@ -94,7 +107,7 @@ trait TwoFactorAuthentication
      */
     protected function twoFactorLabel()
     {
-        return $this->getAttribute('email');
+        return $this->email;
     }
 
     /**
@@ -103,8 +116,7 @@ trait TwoFactorAuthentication
      * @param  string  $code
      * @return bool
      */
-    public function confirmTwoFactorAuth(string $code) : bool
-    {
+    public function confirmTwoFactorAuth(string $code) : bool {
         if ($this->hasTwoFactorEnabled()) {
             return true;
         }
@@ -144,15 +156,12 @@ trait TwoFactorAuthentication
     }
 
     /**
-     * Makes a Two Factor Code for a given time, and period offset.
-     *
-     * @param  int|string|\Illuminate\Support\Carbon|\Datetime  $at
-     * @param  int  $offset
+     * Makes a Two Factor Code.
      * @return string
      */
-    public function makeTwoFactorCode($at = 'now', int $offset = 0) : string
+    public function makeTwoFactorCode() : string
     {
-        return $this->twoFactorAuth->makeCode($at, $offset);
+        return $this->twoFactorAuth->makeTwoFactorCode();
     }
 
     /**
@@ -172,7 +181,7 @@ trait TwoFactorAuthentication
      */
     public function getRecoveryCodes() : Collection
     {
-        return $this->twoFactorAuth->recovery_codes ?? collect();
+        return $this->twoFactorAuth->getRecoveryCodes() ?? collect();
     }
 
     /**
@@ -184,13 +193,14 @@ trait TwoFactorAuthentication
     {
         [$enabled, $amount, $length] = array_values(config('laraguard.recovery'));
 
-        $this->twoFactorAuth->recovery_codes = config('laraguard.model')::generateRecoveryCodes($amount, $length);
-        $this->twoFactorAuth->recovery_codes_generated_at = now();
-        $this->twoFactorAuth->save();
+        $this->twoFactorAuth->setRecoveryCodes(config('laraguard.model')::generateRecoveryCodes($amount, $length));
+        $this->twoFactorAuth->setRecoveryCodesGeneratedAt(now());
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         event(new Events\TwoFactorRecoveryCodesGenerated($this));
 
-        return $this->twoFactorAuth->recovery_codes;
+        return $this->twoFactorAuth->getRecoveryCodes();
     }
 
     /**
@@ -205,7 +215,8 @@ trait TwoFactorAuthentication
             return false;
         }
 
-        $this->twoFactorAuth->save();
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         if (! $this->hasRecoveryCodes()) {
             event(new Events\TwoFactorRecoveryCodesDepleted($this));
@@ -222,7 +233,7 @@ trait TwoFactorAuthentication
      */
     public function addSafeDevice(Request $request) : string
     {
-        $devices = collect($this->twoFactorAuth->safe_devices)->push([
+        $devices = collect($this->twoFactorAuth->getSafeDevices())->push([
             '2fa_remember' => $token = $this->generateTwoFactorRemember(),
             'ip'           => $request->ip(),
             'added_at'     => now()->timestamp,
@@ -232,9 +243,10 @@ trait TwoFactorAuthentication
             $devices = $devices->slice(0, $max)->values();
         }
 
-        $this->twoFactorAuth->safe_devices = $devices;
+        $this->twoFactorAuth->setSafeDevices($devices);
 
-        $this->twoFactorAuth->save();
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
 
         cookie()->queue('2fa_remember', $token, config('laraguard.safe_devices.expiration_days', 0) * 1440);
 
@@ -258,7 +270,9 @@ trait TwoFactorAuthentication
      */
     public function flushSafeDevices() : bool
     {
-        return $this->twoFactorAuth->setAttribute('safe_devices', null)->save();
+        $this->twoFactorAuth->setSafeDevices(new Collection());
+        app(EntityManager::class)->persist($this->twoFactorAuth);
+        app(EntityManager::class)->flush();
     }
 
     /**
@@ -268,7 +282,7 @@ trait TwoFactorAuthentication
      */
     public function safeDevices() : Collection
     {
-        return $this->twoFactorAuth->safe_devices ?? collect();
+        return $this->twoFactorAuth->getSafeDevices() ?? collect();
     }
 
     /**

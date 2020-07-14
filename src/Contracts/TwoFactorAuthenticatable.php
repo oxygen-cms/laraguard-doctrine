@@ -5,8 +5,7 @@ namespace DarkGhostHunter\Laraguard\Contracts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
-interface TwoFactorAuthenticatable
-{
+interface TwoFactorAuthenticatable {
     /**
      * Determines if the User has Two Factor Authentication enabled or not.
      *
@@ -52,13 +51,10 @@ interface TwoFactorAuthenticatable
     public function validateTwoFactorCode(?string $code = null) : bool;
 
     /**
-     * Makes a Two Factor Code for a given time, and period offset.
-     *
-     * @param  int|string|\Illuminate\Support\Carbon|\Datetime  $at
-     * @param  int  $offset
+     * Makes a Two Factor Code/
      * @return string
      */
-    public function makeTwoFactorCode($at = 'now', int $offset = 0) : string;
+    public function makeTwoFactorCode() : string;
 
     /**
      * Return the current set of Recovery Codes.

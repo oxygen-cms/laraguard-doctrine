@@ -1,15 +1,16 @@
 <?php
 
 return [
-    'title'    => 'Two Factor Authentication',
-    'required' => 'Two Factor Authentication is required.',
+    'title'    => 'Two factor authentication',
+    'required' => 'Two factor authentication is required.',
     'back'     => 'Go back',
     'continue' => 'To continue, open up your Authenticator app and issue your 2FA code.',
-    'enable'   => 'You need to enable Two Factor Authentication.',
+    'enable'   => 'You need to enable two factor authentication.',
+    'already_enabled' => 'You have already enabled two factor authentication for your account',
 
-    'fail_confirm' => 'The code to activate Two Factor Authentication is invalid.',
-    'enabled'      => 'Two Factor Authentication has been enabled for your account.',
-    'disabled'     => 'Two Factor Authentication has been disabled for your account.',
+    'fail_confirm' => 'The code to activate two factor authentication is invalid.',
+    'enabled'      => 'Two factor authentication has been enabled for your account.',
+    'disabled'     => 'Two factor authentication has been disabled for your account.',
 
     'safe_device' => 'We won\'t ask you for Two Factor Authentication codes in this device for some time.',
 

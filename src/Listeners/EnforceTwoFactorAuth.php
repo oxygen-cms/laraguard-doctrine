@@ -98,9 +98,8 @@ class EnforceTwoFactorAuth implements TwoFactorListener
      * @param  bool  $error
      * @return void
      */
-    protected function throwResponse(TwoFactorAuthenticatable $user, bool $error = false)
-    {
-        $view = view('laraguard::auth', [
+    protected function throwResponse(TwoFactorAuthenticatable $user, bool $error = false) {
+        $view = view('oxygen/mod-auth::confirmTwoFactorCode', [
             'action'      => request()->fullUrl(),
             'credentials' => $this->credentials,
             'user'        => $user,

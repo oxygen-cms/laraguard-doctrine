@@ -9,23 +9,19 @@ interface TwoFactorTotp extends Renderable
     /**
      * Validates a given code, optionally for a given timestamp and future window.
      *
-     * @param  string  $code
-     * @param  int|string|\Illuminate\Support\Carbon|\Datetime  $at
+     * @param  string $code
      * @param  int  $window
      * @return bool
      */
-    public function validateCode(string $code, $at = 'now', int $window = null) : bool;
+    public function validateCode(string $code, int $window = null) : bool;
 
     /**
-     * Creates a Code for a given timestamp, optionally by a given period offset.
-     *
-     * @param  string  $at
-     * @param  int  $offset
+     * Creates a Code for the current timestamp.
      * @return string
      */
-    public function makeCode($at = 'now', int $offset = 0) : string;
+    public function makeTwoFactorCode() : string;
 
-    /**
+    /**1
      * Returns the Shared Secret as a QR Code.
      *
      * @return string
