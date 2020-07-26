@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\Attempting;
 use Illuminate\Contracts\Config\Repository;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorListener;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Core\Http\Notification;
 
 class EnforceTwoFactorAuth implements TwoFactorListener
 {
@@ -99,11 +100,17 @@ class EnforceTwoFactorAuth implements TwoFactorListener
      * @return void
      */
     protected function throwResponse(TwoFactorAuthenticatable $user, bool $error = false) {
+        if($error) {
+            \Session::flash('adminMessage', [
+                'content' => __('laraguard::validation.totp_code'),
+                'status' => Notification::FAILED
+            ]);
+        }
+
         $view = view('oxygen/mod-auth::confirmTwoFactorCode', [
             'action'      => request()->fullUrl(),
             'credentials' => $this->credentials,
             'user'        => $user,
-            'error'       => $error,
             'remember'    => $this->remember,
             'input'       => $this->input
         ]);
