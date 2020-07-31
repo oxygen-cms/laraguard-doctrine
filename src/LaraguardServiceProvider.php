@@ -10,15 +10,13 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Validation\Factory;
 
-class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
-{
+class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider {
     /**
      * Register the application services.
      *
      * @return void
      */
-    public function register()
-    {
+    public function register() {
         $this->loadEntitiesFrom(__DIR__ . '/Doctrine');
         $this->mergeConfigFrom(__DIR__ . '/../config/laraguard.php', 'laraguard');
     }
@@ -32,8 +30,7 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
      * @param  \Illuminate\Contracts\Validation\Factory  $validator
      * @return void
      */
-    public function boot(Repository $config, Router $router, Dispatcher $dispatcher, Factory $validator)
-    {
+    public function boot(Repository $config, Router $router, Dispatcher $dispatcher, Factory $validator) {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'laraguard');
         // $this->loadFactoriesFrom(__DIR__ . '/../database/factories');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'laraguard');
@@ -41,7 +38,6 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
 
         $this->registerListener($config, $dispatcher);
         $this->registerRules($validator);
-        $this->registerRoutes($config, $router);
 
         if ($this->app->runningInConsole()) {
             $this->publishFiles();
@@ -55,8 +51,7 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
      * @param  \Illuminate\Contracts\Events\Dispatcher  $dispatcher
      * @return void
      */
-    protected function registerListener(Repository $config, Dispatcher $dispatcher)
-    {
+    protected function registerListener(Repository $config, Dispatcher $dispatcher) {
         if (! $listener = $config['laraguard.listener']) {
             return;
         }
@@ -75,30 +70,8 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
      * @param  \Illuminate\Contracts\Validation\Factory  $validator
      * @return void
      */
-    protected function registerRules(Factory $validator)
-    {
+    protected function registerRules(Factory $validator) {
         $validator->extendImplicit('totp_code', Rules\TotpCodeRule::class, trans('laraguard::validation.totp_code'));
-    }
-
-    /**
-     * Register the routes for 2FA Code confirmation.
-     *
-     * @param  \Illuminate\Contracts\Config\Repository  $config
-     * @param  \Illuminate\Routing\Router  $router
-     * @return void
-     */
-    protected function registerRoutes(Repository $config, Router $router)
-    {
-        if ($view = $config->get('laraguard.confirm.view')) {
-            $router->get('2fa/confirm', $view)
-                ->middleware('web')
-                ->name('2fa.confirm');
-        }
-
-        if ($action = $config->get('laraguard.confirm.action')) {
-            $router->post('2fa/confirm', $action)
-                ->middleware('web');
-        }
     }
 
     /**
@@ -106,8 +79,7 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider
      *
      * @return void
      */
-    protected function publishFiles()
-    {
+    protected function publishFiles() {
         $this->publishes([
             __DIR__ . '/../config/laraguard.php' => config_path('laraguard.php'),
         ], 'config');

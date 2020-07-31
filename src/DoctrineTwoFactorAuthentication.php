@@ -3,13 +3,12 @@
 namespace DarkGhostHunter\Laraguard;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping AS ORM;
+use Doctrine\ORM\Mapping as ORM;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
-trait DoctrineTwoFactorAuthentication
-{
+trait DoctrineTwoFactorAuthentication {
 //    /**
 //     * Initialize the current Trait.
 //     *
@@ -43,8 +42,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return bool
      */
-    public function hasTwoFactorEnabled() : bool
-    {
+    public function hasTwoFactorEnabled(): bool {
         return $this->twoFactorAuth != null && $this->twoFactorAuth->isEnabled();
     }
 
@@ -53,7 +51,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return void
      */
-    public function enableTwoFactorAuth() : void {
+    public function enableTwoFactorAuth(): void {
         $this->twoFactorAuth->setEnabledAt(now());
 
         if (config('laraguard.recovery.enabled')) {
@@ -71,8 +69,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return void
      */
-    public function disableTwoFactorAuth() : void
-    {
+    public function disableTwoFactorAuth(): void {
 
         $this->twoFactorAuth->flushAuth();
         app(EntityManager::class)->persist($this->twoFactorAuth);
@@ -86,8 +83,8 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return \DarkGhostHunter\Laraguard\Contracts\TwoFactorTotp
      */
-    public function createTwoFactorAuth() : Contracts\TwoFactorTotp {
-        if($this->twoFactorAuth == null) {
+    public function createTwoFactorAuth(): Contracts\TwoFactorTotp {
+        if ($this->twoFactorAuth == null) {
             $this->twoFactorAuth = new \DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication($this);
         }
         $this->twoFactorAuth
@@ -105,18 +102,17 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return string
      */
-    protected function twoFactorLabel()
-    {
+    protected function twoFactorLabel() {
         return $this->email;
     }
 
     /**
      * Confirms the Shared Secret and fully enables the Two Factor Authentication.
      *
-     * @param  string  $code
+     * @param string $code
      * @return bool
      */
-    public function confirmTwoFactorAuth(string $code) : bool {
+    public function confirmTwoFactorAuth(string $code): bool {
         if ($this->hasTwoFactorEnabled()) {
             return true;
         }
@@ -135,20 +131,18 @@ trait DoctrineTwoFactorAuthentication
      * @param $code
      * @return bool
      */
-    protected function validateCode($code)
-    {
+    protected function validateCode($code) {
         return $this->twoFactorAuth->validateCode($code);
     }
 
     /**
      * Validates the TOTP Code or Recovery Code.
      *
-     * @param  string  $code
+     * @param string $code
      * @return bool
      */
-    public function validateTwoFactorCode(?string $code = null) : bool
-    {
-        if (! $code || ! $this->hasTwoFactorEnabled()) {
+    public function validateTwoFactorCode(?string $code = null): bool {
+        if (!$code || !$this->hasTwoFactorEnabled()) {
             return false;
         }
 
@@ -159,8 +153,7 @@ trait DoctrineTwoFactorAuthentication
      * Makes a Two Factor Code.
      * @return string
      */
-    public function makeTwoFactorCode() : string
-    {
+    public function makeTwoFactorCode(): string {
         return $this->twoFactorAuth->makeTwoFactorCode();
     }
 
@@ -169,8 +162,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return bool
      */
-    protected function hasRecoveryCodes() : bool
-    {
+    protected function hasRecoveryCodes(): bool {
         return $this->twoFactorAuth->containsUnusedRecoveryCodes();
     }
 
@@ -179,8 +171,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getRecoveryCodes() : Collection
-    {
+    public function getRecoveryCodes(): Collection {
         return $this->twoFactorAuth->getRecoveryCodes() ?? collect();
     }
 
@@ -189,8 +180,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return \Illuminate\Support\Collection
      */
-    public function generateRecoveryCodes() : Collection
-    {
+    public function generateRecoveryCodes(): Collection {
         [$enabled, $amount, $length] = array_values(config('laraguard.recovery'));
 
         $this->twoFactorAuth->setRecoveryCodes(config('laraguard.model')::generateRecoveryCodes($amount, $length));
@@ -206,19 +196,18 @@ trait DoctrineTwoFactorAuthentication
     /**
      * Uses a one-time Recovery Code if there is one available.
      *
-     * @param  string  $code
+     * @param string $code
      * @return mixed
      */
-    protected function useRecoveryCode(string $code) : bool
-    {
-        if (! config('laraguard.recovery.enabled') || ! $this->twoFactorAuth->setRecoveryCodeAsUsed($code)) {
+    protected function useRecoveryCode(string $code): bool {
+        if (!config('laraguard.recovery.enabled') || !$this->twoFactorAuth->setRecoveryCodeAsUsed($code)) {
             return false;
         }
 
         app(EntityManager::class)->persist($this->twoFactorAuth);
         app(EntityManager::class)->flush();
 
-        if (! $this->hasRecoveryCodes()) {
+        if (!$this->hasRecoveryCodes()) {
             event(new Events\TwoFactorRecoveryCodesDepleted($this));
         }
 
@@ -228,15 +217,14 @@ trait DoctrineTwoFactorAuthentication
     /**
      * Adds a "safe" Device from the Request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return string
      */
-    public function addSafeDevice(Request $request) : string
-    {
+    public function addSafeDevice(Request $request): string {
         $devices = collect($this->twoFactorAuth->getSafeDevices())->push([
             '2fa_remember' => $token = $this->generateTwoFactorRemember(),
-            'ip'           => $request->ip(),
-            'added_at'     => now()->timestamp,
+            'ip' => $request->ip(),
+            'added_at' => now()->timestamp,
         ])->sortByDesc('added_at');
 
         if ($devices->count() > $max = config('laraguard.safe_devices.max_devices')) {
@@ -258,8 +246,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return string
      */
-    protected function generateTwoFactorRemember()
-    {
+    protected function generateTwoFactorRemember() {
         return config('laraguard.model')::generateDefaultTwoFactorRemember();
     }
 
@@ -268,8 +255,7 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return bool
      */
-    public function flushSafeDevices() : bool
-    {
+    public function flushSafeDevices(): bool {
         $this->twoFactorAuth->setSafeDevices(new Collection());
         app(EntityManager::class)->persist($this->twoFactorAuth);
         app(EntityManager::class)->flush();
@@ -280,19 +266,17 @@ trait DoctrineTwoFactorAuthentication
      *
      * @return \Illuminate\Support\Collection
      */
-    public function safeDevices() : Collection
-    {
+    public function safeDevices(): Collection {
         return $this->twoFactorAuth->getSafeDevices() ?? collect();
     }
 
     /**
      * Determines if the Request has been made through a previously used "safe" device.
      *
-     * @param  null|\Illuminate\Http\Request  $request
+     * @param null|\Illuminate\Http\Request $request
      * @return bool
      */
-    public function isSafeDevice(Request $request) : bool
-    {
+    public function isSafeDevice(Request $request): bool {
         $timestamp = $this->twoFactorAuth->getSafeDeviceTimestamp(
             $this->getTwoFactorRememberFromRequest($request)
         );
@@ -307,22 +291,20 @@ trait DoctrineTwoFactorAuthentication
     /**
      * Returns the Two Factor Remember Token of the request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return null|array|string
      */
-    protected function getTwoFactorRememberFromRequest(Request $request)
-    {
+    protected function getTwoFactorRememberFromRequest(Request $request) {
         return $request->cookie('2fa_remember');
     }
 
     /**
      * Determines if the Request has been made through a not-previously-known device.
      *
-     * @param  null|\Illuminate\Http\Request  $request
+     * @param null|\Illuminate\Http\Request $request
      * @return bool
      */
-    public function isNotSafeDevice(Request $request) : bool
-    {
-        return ! $this->isSafeDevice($request);
+    public function isNotSafeDevice(Request $request): bool {
+        return !$this->isSafeDevice($request);
     }
 }
