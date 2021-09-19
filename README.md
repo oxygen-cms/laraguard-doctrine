@@ -1,11 +1,12 @@
-![Zachary Lisko - Unsplash (UL) #JEBeXUHm1c4](https://images.unsplash.com/flagged/photo-1570343271132-8949dd284a04?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1280&h=400&q=80)
+# Laraguard - Doctrine Edition
 
-# Laraguard
+**Please note:** this package has been stripped to a barebones version, tightly coupled to [oxygen/auth](https://github.com/oxygen-cms/auth).
+Essentially, I have taken the bits which I would like to use, and stripped the rest.
+Eventually these parts should just become part of `oxygen/auth` itself.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/darkghosthunter/laraguard.svg?style=flat-square)](https://packagist.org/packages/darkghosthunter/laraguard) [![License](https://poser.pugx.org/darkghosthunter/laraguard/license)](https://packagist.org/packages/darkghosthunter/laraguard)
-![](https://img.shields.io/packagist/php-v/darkghosthunter/laraguard.svg)
- ![](https://github.com/DarkGhostHunter/Laraguard/workflows/PHP%20Composer/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/DarkGhostHunter/Laraguard/badge.svg?branch=master)](https://coveralls.io/github/DarkGhostHunter/Laraguard?branch=master)
+<hr >
+
+# Original Readme Below:
 
 Two Factor Authentication via TOTP for all your Users out-of-the-box.
 

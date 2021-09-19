@@ -11,14 +11,14 @@ class TotpCodeRule implements Rule {
     /**
      * The auth user.
      *
-     * @var \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable
+     * @var Authenticatable|TwoFactorAuthenticatable
      */
     protected $user;
 
     /**
      * Create a new "totp code" rule instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
+     * @param Authenticatable|null  $user
      */
     public function __construct(Authenticatable $user = null) {
         $this->user = $user;

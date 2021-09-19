@@ -2,11 +2,6 @@
 
 namespace DarkGhostHunter\Laraguard;
 
-use Illuminate\Routing\Router;
-use Illuminate\Auth\Events\Validated;
-use Illuminate\Auth\Events\Attempting;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Validation\Factory;
 use Oxygen\Data\BaseServiceProvider;
 
@@ -24,12 +19,10 @@ class LaraguardServiceProvider extends BaseServiceProvider {
     /**
      * Bootstrap the application services.
      *
-     * @param Repository $config
-     * @param Dispatcher $dispatcher
      * @param Factory $validator
      * @return void
      */
-    public function boot(Repository $config, Dispatcher $dispatcher, Factory $validator) {
+    public function boot(Factory $validator) {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'laraguard');
 
         $this->registerRules($validator);
@@ -62,14 +55,5 @@ class LaraguardServiceProvider extends BaseServiceProvider {
         $this->publishes([
             __DIR__ . '/../resources/lang' => resource_path('lang/vendor/laraguard'),
         ], 'translations');
-
-        // We will allow the publishing for the Two Factor Authentication migration that
-        // holds the TOTP data, only if it wasn't published before, avoiding multiple
-        // copies for the same migration, which can throw errors when re-migrating.
-        if (! class_exists('CreateTwoFactorAuthenticationsTable')) {
-            $this->publishes([
-                __DIR__ . '/../database/migrations/2020_04_02_000000_create_two_factor_authentications_table.php' => database_path('migrations/' . now()->format('Y_m_d_His') . '_create_two_factor_authentications_table.php'),
-            ], 'migrations');
-        }
     }
 }

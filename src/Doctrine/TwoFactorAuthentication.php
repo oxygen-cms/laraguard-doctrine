@@ -23,7 +23,8 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     use PrimaryKey, Timestamps;
 
     /**
-     * @ORM\OneToOne(targetEntity="\Oxygen\Auth\Entity\User", inversedBy="twoFactorAuth")
+     * @ORM\OneToOne(targetEntity="\Oxygen\Auth\Entity\User", inversedBy="twoFactorAuth", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="authenticatable_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $authenticatable;
 

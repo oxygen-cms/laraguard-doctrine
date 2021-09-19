@@ -2,9 +2,10 @@
 
 namespace DarkGhostHunter\Laraguard;
 
+use DarkGhostHunter\Laraguard\Contracts\TwoFactorTotp;
+use DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -12,7 +13,7 @@ trait DoctrineTwoFactorAuthentication {
 
     /**
      * @ORM\OneToOne(targetEntity="DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication", mappedBy="authenticatable")
-     * @var \DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication
+     * @var TwoFactorAuthentication
      */
     protected $twoFactorAuth;
 
@@ -60,11 +61,11 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Creates a new Two Factor Auth mechanisms from scratch, and returns a new Shared Secret.
      *
-     * @return \DarkGhostHunter\Laraguard\Contracts\TwoFactorTotp
+     * @return TwoFactorTotp
      */
     public function createTwoFactorAuth(): Contracts\TwoFactorTotp {
         if ($this->twoFactorAuth == null) {
-            $this->twoFactorAuth = new \DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication($this);
+            $this->twoFactorAuth = new TwoFactorAuthentication($this);
         }
         $this->twoFactorAuth
             ->flushAuth()
@@ -148,7 +149,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Return the current set of Recovery Codes.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function getRecoveryCodes(): Collection {
         return $this->twoFactorAuth->getRecoveryCodes() ?? collect();
@@ -157,7 +158,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Generates a new set of Recovery Codes.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function generateRecoveryCodes(): Collection {
         [$enabled, $amount, $length] = array_values(config('laraguard.recovery'));
@@ -196,7 +197,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Adds a "safe" Device from the Request.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return string
      */
     public function addSafeDevice(Request $request): string {
@@ -243,7 +244,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Return all the Safe Devices that bypass Two Factor Authentication.
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function safeDevices(): Collection {
         return $this->twoFactorAuth->getSafeDevices() ?? collect();
@@ -252,7 +253,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Determines if the Request has been made through a previously used "safe" device.
      *
-     * @param null|\Illuminate\Http\Request $request
+     * @param null|Request $request
      * @return bool
      */
     public function isSafeDevice(Request $request): bool {
@@ -270,7 +271,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Returns the Two Factor Remember Token of the request.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return null|array|string
      */
     protected function getTwoFactorRememberFromRequest(Request $request) {
@@ -280,7 +281,7 @@ trait DoctrineTwoFactorAuthentication {
     /**
      * Determines if the Request has been made through a not-previously-known device.
      *
-     * @param null|\Illuminate\Http\Request $request
+     * @param null|Request $request
      * @return bool
      */
     public function isNotSafeDevice(Request $request): bool {
