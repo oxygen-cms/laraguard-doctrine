@@ -5,9 +5,9 @@ namespace DarkGhostHunter\Laraguard\Rules;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Translation\Translator;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use Illuminate\Contracts\Validation\Rule;
 
-class TotpCodeRule
-{
+class TotpCodeRule implements Rule {
     /**
      * The auth user.
      *
@@ -16,22 +16,12 @@ class TotpCodeRule
     protected $user;
 
     /**
-     * Translator instance.
-     *
-     * @var \Illuminate\Contracts\Translation\Translator
-     */
-    protected $translator;
-
-    /**
      * Create a new "totp code" rule instance.
      *
-     * @param  \Illuminate\Contracts\Translation\Translator  $translator
      * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
      */
-    public function __construct(Translator $translator, Authenticatable $user = null)
-    {
+    public function __construct(Authenticatable $user = null) {
         $this->user = $user;
-        $this->translator = $translator;
     }
 
     /**
@@ -41,13 +31,21 @@ class TotpCodeRule
      * @param  mixed  $value
      * @return bool
      */
-    public function validate($attribute, $value)
-    {
+    public function passes($attribute, $value) {
         if (is_string($value) && $this->user instanceof TwoFactorAuthenticatable) {
             return $this->user->validateTwoFactorCode($value);
         }
 
         return false;
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string|array
+     */
+    public function message() {
+        return trans('laraguard::validation.totp_code');
     }
 
 }

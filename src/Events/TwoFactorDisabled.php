@@ -4,8 +4,7 @@ namespace DarkGhostHunter\Laraguard\Events;
 
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 
-class TwoFactorDisabled
-{
+class TwoFactorDisabled {
     /**
      * The User using Two Factor Authentication.
      *
@@ -19,8 +18,7 @@ class TwoFactorDisabled
      * @param  \DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable  $user
      * @return void
      */
-    public function __construct(TwoFactorAuthenticatable $user)
-    {
+    public function __construct(TwoFactorAuthenticatable $user) {
         $this->user = $user;
     }
 }

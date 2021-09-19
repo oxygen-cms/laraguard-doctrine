@@ -5,12 +5,12 @@ namespace DarkGhostHunter\Laraguard;
 use Illuminate\Routing\Router;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Auth\Events\Attempting;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Validation\Factory;
+use Oxygen\Data\BaseServiceProvider;
 
-class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider {
+class LaraguardServiceProvider extends BaseServiceProvider {
     /**
      * Register the application services.
      *
@@ -24,19 +24,14 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider {
     /**
      * Bootstrap the application services.
      *
-     * @param  \Illuminate\Contracts\Config\Repository  $config
-     * @param  \Illuminate\Routing\Router  $router
-     * @param  \Illuminate\Contracts\Events\Dispatcher  $dispatcher
-     * @param  \Illuminate\Contracts\Validation\Factory  $validator
+     * @param Repository $config
+     * @param Dispatcher $dispatcher
+     * @param Factory $validator
      * @return void
      */
-    public function boot(Repository $config, Router $router, Dispatcher $dispatcher, Factory $validator) {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'laraguard');
-        // $this->loadFactoriesFrom(__DIR__ . '/../database/factories');
+    public function boot(Repository $config, Dispatcher $dispatcher, Factory $validator) {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'laraguard');
-        // $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        $this->registerListener($config, $dispatcher);
         $this->registerRules($validator);
 
         if ($this->app->runningInConsole()) {
@@ -45,29 +40,9 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider {
     }
 
     /**
-     * Register a listeners to tackle authentication.
-     *
-     * @param  \Illuminate\Contracts\Config\Repository  $config
-     * @param  \Illuminate\Contracts\Events\Dispatcher  $dispatcher
-     * @return void
-     */
-    protected function registerListener(Repository $config, Dispatcher $dispatcher) {
-        if (! $listener = $config['laraguard.listener']) {
-            return;
-        }
-
-        $this->app->singleton(Contracts\TwoFactorListener::class, function ($app) use ($listener) {
-            return new $listener($app['config'], $app['request']);
-        });
-
-        $dispatcher->listen(Attempting::class, Contracts\TwoFactorListener::class . '@saveCredentials');
-        $dispatcher->listen(Validated::class, Contracts\TwoFactorListener::class . '@checkTwoFactor');
-    }
-
-    /**
      * Register custom validation rules.
      *
-     * @param  \Illuminate\Contracts\Validation\Factory  $validator
+     * @param Factory $validator
      * @return void
      */
     protected function registerRules(Factory $validator) {
@@ -83,10 +58,6 @@ class LaraguardServiceProvider extends \Oxygen\Data\BaseServiceProvider {
         $this->publishes([
             __DIR__ . '/../config/laraguard.php' => config_path('laraguard.php'),
         ], 'config');
-
-        $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/laraguard'),
-        ], 'views');
 
         $this->publishes([
             __DIR__ . '/../resources/lang' => resource_path('lang/vendor/laraguard'),

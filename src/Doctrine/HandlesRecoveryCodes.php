@@ -5,15 +5,13 @@ namespace DarkGhostHunter\Laraguard\Doctrine;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 
-trait HandlesRecoveryCodes
-{
+trait HandlesRecoveryCodes {
     /**
      * Returns if there are Recovery Codes available.
      *
      * @return bool
      */
-    public function containsUnusedRecoveryCodes()
-    {
+    public function containsUnusedRecoveryCodes() {
         return $this->recovery_codes && $this->recovery_codes->contains('used_at', null);
     }
 
@@ -23,8 +21,7 @@ trait HandlesRecoveryCodes
      * @param  string  $code
      * @return int|null
      */
-    protected function getUnusedRecoveryCodeIndex(string $code)
-    {
+    protected function getUnusedRecoveryCodeIndex(string $code) {
         $key = optional($this->recovery_codes)->search([
             'code'    => $code,
             'used_at' => null,
@@ -39,8 +36,7 @@ trait HandlesRecoveryCodes
      * @param  string  $code
      * @return bool
      */
-    public function setRecoveryCodeAsUsed(string $code)
-    {
+    public function setRecoveryCodeAsUsed(string $code) {
         if (null === $index = $this->getUnusedRecoveryCodeIndex($code)) {
             return false;
         }
@@ -60,8 +56,7 @@ trait HandlesRecoveryCodes
      * @param  int  $length
      * @return \Illuminate\Support\Collection
      */
-    public static function generateRecoveryCodes(int $amount, int $length)
-    {
+    public static function generateRecoveryCodes(int $amount, int $length) {
         return Collection::times($amount, function () use ($length) {
             return [
                 'code'    => strtoupper(Str::random($length)),

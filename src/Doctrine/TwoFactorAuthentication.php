@@ -116,23 +116,19 @@ class TwoFactorAuthentication implements TwoFactorTotp {
         $this->recovery_codes = $codes->toArray();
     }
 
-    public function setRecoveryCodesGeneratedAt(\Illuminate\Support\Carbon $now)
-    {
+    public function setRecoveryCodesGeneratedAt(\Illuminate\Support\Carbon $now) {
         $this->recovery_codes_generated_at = $now->toDateTime();
     }
 
-    public function getSafeDevices()
-    {
+    public function getSafeDevices() {
         return collect($this->safe_devices);
     }
 
-    public function setSafeDevices(Collection $devices)
-    {
+    public function setSafeDevices(Collection $devices) {
         $this->safe_devices = $devices->toArray();
     }
 
-    public function setEnabledAt(\Illuminate\Support\Carbon $now)
-    {
+    public function setEnabledAt(\Illuminate\Support\Carbon $now) {
         $this->enabled_at = $now->toDateTime();
     }
 
@@ -140,8 +136,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      * Gets the Shared Secret attribute from its binary form.
      * @return null|string
      */
-    protected function getSharedSecret()
-    {
+    protected function getSharedSecret() {
         return $this->shared_secret;
     }
 
@@ -150,8 +145,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @param $value
      */
-    protected function setSharedSecret($value)
-    {
+    protected function setSharedSecret($value) {
         $this->shared_secret = $value;
     }
 
@@ -160,8 +154,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @param $value
      */
-    protected function setAlgorithmAttribute($value)
-    {
+    protected function setAlgorithmAttribute($value) {
         $this->algorithm = strtolower($value);
     }
 
@@ -170,8 +163,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @return bool
      */
-    public function isEnabled()
-    {
+    public function isEnabled() {
         return $this->enabled_at !== null;
     }
 
@@ -180,9 +172,8 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      *
      * @return bool
      */
-    public function isDisabled()
-    {
-        return ! $this->isEnabled();
+    public function isDisabled() {
+        return !$this->isEnabled();
     }
 
     /**

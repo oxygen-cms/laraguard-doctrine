@@ -9,27 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 trait DoctrineTwoFactorAuthentication {
-//    /**
-//     * Initialize the current Trait.
-//     *
-//     * @return void
-//     */
-//    public function initializeTwoFactorAuthentication()
-//    {
-//        // For security, we will hide the Two Factor Authentication data from the parent model.
-//        $this->makeHidden('twoFactorAuth');
-//    }
-//
-//    /**
-//     * This connects the current Model to the Two Factor Authentication model.
-//     *
-//     * @return \Illuminate\Database\Eloquent\Relations\MorphOne|\DarkGhostHunter\Laraguard\Eloquent\TwoFactorAuthentication
-//     */
-//    public function twoFactorAuth()
-//    {
-//        return $this->morphOne(config('laraguard.model'), 'authenticatable')
-//            ->withDefault(config('laraguard.totp'));
-//    }
 
     /**
      * @ORM\OneToOne(targetEntity="DarkGhostHunter\Laraguard\Doctrine\TwoFactorAuthentication", mappedBy="authenticatable")

@@ -7,8 +7,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 
-trait SerializesSharedSecret
-{
+trait SerializesSharedSecret {
     /**
      * Returns the Shared Secret as an URI.
      *

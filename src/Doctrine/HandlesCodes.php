@@ -7,8 +7,7 @@ use Illuminate\Support\Carbon;
 use OTPHP\TOTP;
 use ParagonIE\ConstantTime\Base32;
 
-trait HandlesCodes
-{
+trait HandlesCodes {
     /**
      * Current instance of the Cache Repository.
      *
