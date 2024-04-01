@@ -27,7 +27,7 @@
         "doctrine/orm": "^2.14",
         "illuminate/auth": "^10.0",
         "illuminate/support": "^10.0",
-        "oxygen/data": "dev-laravel10",
+        "oxygen/data": "~0.12.0",
         "paragonie/constant_time_encoding": "^2.0",
         "spomky-labs/otphp": "^10.0"
     },
@@ -53,12 +53,6 @@
     "config": {
         "sort-packages": true
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/oxygen-cms/data.git"
-        }
-    ],
     "extra": {
         "laravel": {
             "providers": [
