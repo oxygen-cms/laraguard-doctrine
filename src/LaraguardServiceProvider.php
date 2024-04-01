@@ -53,7 +53,7 @@ class LaraguardServiceProvider extends BaseServiceProvider {
         ], 'config');
 
         $this->publishes([
-            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/laraguard'),
+            __DIR__ . '/../resources/lang' => $this->app->langPath('vendor/laraguard'),
         ], 'translations');
     }
 }

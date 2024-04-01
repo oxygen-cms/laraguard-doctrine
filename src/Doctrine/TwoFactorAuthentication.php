@@ -64,7 +64,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     private $algorithm;
 
     /**
-     * @ORM\Column(type="json_array", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
     protected $recovery_codes;
 
@@ -75,7 +75,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     private $recovery_codes_generated_at;
 
     /**
-     * @ORM\Column(type="json_array", nullable=true)
+     * @ORM\Column(type="json", nullable=true)
      */
     private $safe_devices;
 
