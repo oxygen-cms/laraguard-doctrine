@@ -549,3 +549,7 @@ If you discover any security related issues, please email darkghosthunter@gmail.
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
 Laravel is a Trademark of Taylor Otwell. Copyright © 2011-2020 Laravel LLC.
+
+---
+
+> **Retired.** This Doctrine fork has been folded into [`oxygen/auth`](https://github.com/oxygen-cms/auth) (`src/TwoFactor`, config key `two-factor`). Recovery codes and safe devices were not carried over. No further development happens here.
