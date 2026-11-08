@@ -69,7 +69,11 @@ trait HandlesCodes {
 
         $window = $window ?? $this->window;
 
-        return $this->makeOTP()->verify($code, null, $window);
+        // otphp v11 interprets the third arg as seconds of clock drift (must be < period)
+        // rather than number of periods, so translate here to preserve the periods-based API.
+        $windowSeconds = $window > 0 ? $this->seconds - 1 : 0;
+
+        return $this->makeOTP()->verify($code, null, $windowSeconds);
     }
 
     /**
