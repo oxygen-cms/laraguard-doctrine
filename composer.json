@@ -31,24 +31,10 @@
         "paragonie/constant_time_encoding": "^2.0",
         "spomky-labs/otphp": "^11.0"
     },
-    "require-dev": {
-        "orchestra/testbench": "^8.14.0",
-        "orchestra/canvas": "^8.11.2",
-        "phpunit/phpunit": "^9.0"
-    },
     "autoload": {
         "psr-4": {
             "DarkGhostHunter\\Laraguard\\": "src"
         }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests"
-        }
-    },
-    "scripts": {
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },
     "config": {
         "sort-packages": true
